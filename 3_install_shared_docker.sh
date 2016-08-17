@@ -93,7 +93,7 @@ cat > $MARFILE << EOF
       "image": "${DOCKER_REG_URL}/dockerregv2",
       "network": "BRIDGE",
       "portMappings": [
-        { "containerPort": 5000, "hostPort": 0, "servicePort": ${NEW_DOCKER_REG_PORT}, "protocol": "tcp"}
+        { "containerPort": 5000, "hostPort": ${NEW_DOCKER_REG_PORT}, "servicePort": 0, "protocol": "tcp"}
       ]
     },
     "volumes": [
