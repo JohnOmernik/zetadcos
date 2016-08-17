@@ -28,11 +28,9 @@ cat > $TFILE << EOF
 machine $HOST login $(cat $CREDS|grep mapr|cut -d":" -f1) password $(cat $CREDS|grep mapr|cut -d":" -f2)
 EOF
 
-
-
 BASE_REST="https://$WEBHOST/rest"
 
-CURL_GET_BASE="/opt/mesosphere/bin/curl -k --netrc-file $TFILE $BASE_REST
+CURL_GET_BASE="/opt/mesosphere/bin/curl -k --netrc-file $TFILE $BASE_REST"
 
 
 SOURCE_IMG="osixia/openldap"
@@ -52,7 +50,6 @@ if [ -d "$APP_ROOT" ]; then
     echo "OpenLDAP Root at $APP_ROOT already exists. Refusing to go on..."
     exit 1
 fi
-
 
 
 mkdir -p ${APP_ROOT}
@@ -78,7 +75,7 @@ MARFILE="${APP_ROOT}/openldap.shared.marathon"
 
 
 # docker run --env LDAP_ORGANISATION="My Company" --env LDAP_DOMAIN="my-company.com" \
-# --env LDAP_ADMIN_PASSWORD="JonSn0w" --detach osixia/openldap:1.1.5
+# --env LDAP_ADMIN_PASSWORD="" --detach osixia/openldap:1.1.5
 cat > $MARFILE << EOF
 {
   "id": "shared/openldap",
@@ -96,11 +93,13 @@ cat > $MARFILE << EOF
       "network": "HOST"
     },
     "volumes": [
-      { "containerPath": "/var/lib/registry", "hostPath": "${DOCKER_IMAGE_LOC}", "mode": "RW" }
+      { "containerPath": "/var/lib/ldap", "hostPath": "${APP_ROOT}/ldap", "mode": "RW" },
+      { "containerPath": "/etc/ldap/slapd.d", "hostPath": "${APP_ROOT}/slapd.d", "mode": "RW" }
     ]
   }
 }
 EOF
+
 
 
 
