@@ -10,9 +10,6 @@ if [ "$CURUSER" != "$IUSER" ]; then
     echo "Must use $IUSER: User: $CURUSER"
 fi
 
-echo "This is not complete, do not use"
-exit 0
-
 CREDS="/home/$IUSER/creds/creds.txt"
 HOST=$(echo $CLDBS|cut -d"," -f1|cut -d":" -f1)
 WEBHOST="$HOST:8443"
@@ -29,7 +26,7 @@ EOF
 
 BASE_REST="https://$WEBHOST/rest"
 
-CURL_GET_BASE="/opt/mesosphere/bin/curl -k --netrc-file $TFILE $BASE_REST
+CURL_GET_BASE="/opt/mesosphere/bin/curl -k --netrc-file $TFILE $BASE_REST"
 
 
 DOCKER_IMAGE_LOC="/mapr/$CLUSTERNAME/zeta/shared/dockerregv2/images"
@@ -78,7 +75,7 @@ EOL
 
 sudo chmod +x /mapr/$CLUSTERNAME/zeta/kstore/env/env_shared/dockerregv2.sh
 
-MARFILE="/mapr/$CLUSTERNAME/mesos/shared/dockerregv2/dockerregv2.shared.marathon"
+MARFILE="/mapr/$CLUSTERNAME/zeta/shared/dockerregv2/dockerregv2.shared.marathon"
 
 cat > $MARFILE << EOF
 {
@@ -97,6 +94,7 @@ cat > $MARFILE << EOF
       "network": "BRIDGE",
       "portMappings": [
         { "containerPort": 5000, "hostPort": 0, "servicePort": ${NEW_DOCKER_REG_PORT}, "protocol": "tcp"}
+      ]
     },
     "volumes": [
       { "containerPath": "/var/lib/registry", "hostPath": "${DOCKER_IMAGE_LOC}", "mode": "RW" }
