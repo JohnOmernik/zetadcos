@@ -13,8 +13,6 @@ if [ "$CURUSER" != "$IUSER" ]; then
     echo "Must use $IUSER: User: $CURUSER"
 fi
 
-echo "This is not complete, do not use"
-exit 0
 
 CREDS="/home/$IUSER/creds/creds.txt"
 HOST=$(echo $CLDBS|cut -d"," -f1|cut -d":" -f1)
@@ -36,7 +34,6 @@ CURL_GET_BASE="/opt/mesosphere/bin/curl -k --netrc-file $TFILE $BASE_REST"
 SOURCE_IMG="osixia/openldap"
 
 sudo docker pull osixia/openldap
-
 APP_IMG="${ZETA_DOCKER_REG_URL}/openldap"
 
 sudo docker tag $SOURCE_IMG $APP_IMG
@@ -62,8 +59,8 @@ sudo chmod -R 750 ${APP_ROOT}
 
 cat > /mapr/$CLUSTERNAME/zeta/kstore/env/env_shared/openldap.sh << EOL
 export ZETA_OPENLDAP_HOST="openldap.shared.marathon.mesos"
-export ZETA_DOCKER_REG_PORT="$NEW_DOCKER_REG_PORT"
-export ZETA_DOCKER_REG_URL="\${ZETA_DOCKER_REG_HOST}:\${ZETA_DOCKER_REG_PORT}"
+export ZETA_OPENLDAP_PORT="389"
+export ZETA_OPENLDAP_SECURE_PORT="636"
 EOL
 
 
@@ -85,6 +82,10 @@ cat > $MARFILE << EOF
   "labels": {
    "CONTAINERIZER":"Docker"
   },
+  "env": {
+  "LDAP_ORGANISATION":"$CLUSTERNAME",
+  "LDAP_DOMAIN":"marathon.mesos"
+  },
   "ports": [],
   "container": {
     "type": "DOCKER",
@@ -102,4 +103,16 @@ EOF
 
 
 
+
+
+echo "Submitting to Marathon"
+curl -X POST $MARATHON_SUBMIT -d @${MARFILE} -H "Content-type: application/json"
+echo ""
+echo ""
+echo ""
+echo ""
+
+echo ""
+
+rm $TFILE
 
