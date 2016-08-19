@@ -194,6 +194,26 @@ homeDirectory: /home/zetasvc$ROLE
 loginShell: /bin/bash
 userPassword: $UHASH
 
+dn: cn=zeta${ROLE}apps,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
+changetype: modify
+add: memberuid
+memberuid: zetasvc$ROLE
+
+dn: cn=zeta${ROLE}data,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
+changetype: modify
+add: memberuid
+memberuid: zetasvc$ROLE
+
+dn: cn=zeta${ROLE}etl,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
+changetype: modify
+add: memberuid
+memberuid: zetasvc$ROLE
+
+dn: cn=zeta${ROLE}zeta,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
+changetype: modify
+add: memberuid
+memberuid: zetasvc$ROLE
+
 EOL
 
 ADD_CMD="ldapmodify -H ldap://openldap.shared.marathon.mesos -x -y /tmp/ldif/p.txt -D \"cn=admin,dc=marathon,dc=mesos\" -f /tmp/ldif/tmp.ldif"
