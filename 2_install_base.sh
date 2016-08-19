@@ -92,7 +92,7 @@ IFS=$OLDIFS
 echo "Setting up zeta kstore information"
 DIR="/mapr/$CLUSTERNAME/zeta/kstore"
 sudo mkdir -p $DIR
-sudo chown zetaadm:zetausers $DIR
+sudo chown zetaadm:2501 $DIR
 sudo chmod 755 $DIR
 
 # Group Sync
@@ -117,6 +117,11 @@ else
     echo "Not clobbering existing zetausers.list"
 fi
 
+if [ ! -f "$DIR/zetauid.list" ]; then
+    touch ${DIR}/zetauid.list
+else
+    echo "Not clobbering existing zetauid.list"
+fi
 
 # ENV Main
 DIR="/mapr/$CLUSTERNAME/zeta/kstore/env"
