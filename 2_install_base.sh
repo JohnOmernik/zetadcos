@@ -68,7 +68,7 @@ for U in $USERS; do
         sudo chown $U:$U /mapr/$CLUSTERNAME/user/$U
     fi
 done
-
+v
 
 OLDIFS=$IFS
 IFS=","
@@ -80,7 +80,7 @@ for DIR in $ROOT_DIRS; do
     else
         sudo mkdir -p /mapr/$CLUSTERNAME/$DIR
     fi
-    sudo chown -R zetaadm:zetausers /mapr/$CLUSTERNAME/$DIR
+    sudo chown -R zetaadm:2501 /mapr/$CLUSTERNAME/$DIR
     sudo chmod -R 750 /mapr/$CLUSTERNAME/$DIR
 done
 IFS=$OLDIFS
@@ -103,15 +103,12 @@ sudo chmod 775 $DIR
 
 if [ ! -f "$DIR/zetagroups.list" ]; then
     cat > ${DIR}/zetagroups.list << GRPEOF
-    zetausers:2501:mapr,zetaadm
 GRPEOF
 else
    echo "Not clobbering existing zetagroups.list"
 fi
 if [ ! -f "$DIR/zetausers.list" ]; then
     cat > ${DIR}/zetausers.list << USROF
-    mapr:$(id -u mapr)
-    zetaadm:$(id -u zetaadm)
 USROF
 else
     echo "Not clobbering existing zetausers.list"
