@@ -35,13 +35,17 @@ echo "We:"
 echo ""
 echo "Create Volumes based on role"
 echo "Create ENV Files per role"
+echo "Create groups or set permission properly"
 echo ""
 echo "We do not:"
 echo ""
-echo "Create groups or set permission properly"
 echo "Ask about Marathon or chronos locations"
 echo ""
 echo "*****************************************************"
+
+
+./add_role_schema.sh $MESOS_ROLE
+
 
 
 CREDS="/home/$IUSER/creds/creds.txt"
@@ -68,9 +72,8 @@ echo "Checking for $MESOS_ROLE dir in each root directory."
 RDS=$(echo "$ROOT_DIRS"|tr "," " ")
 
 for DIR in $RDS; do
-    echo "Permissions set only for zetaadm at this time"
-    ROLE_OWNER="zetaadm:zetaadm"
-    #ROLE_OWNER="zetaadm:zeta${MESOS_ROLE}${DIR}"
+    #ROLE_OWNER="zetaadm:zetaadm"
+    ROLE_OWNER="zetaadm:zeta${MESOS_ROLE}${DIR}"
     echo "Looking for /mapr/$CLUSTERNAME/$DIR/$MESOS_ROLE"
     if [ -d "/mapr/$CLUSTERNAME/$DIR/$MESOS_ROLE" ]; then
         echo "/mapr/$CLUSTERNAME/$DIR/shared already exists, skipping"

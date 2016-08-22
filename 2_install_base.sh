@@ -68,7 +68,6 @@ for U in $USERS; do
         sudo chown $U:$U /mapr/$CLUSTERNAME/user/$U
     fi
 done
-v
 
 OLDIFS=$IFS
 IFS=","

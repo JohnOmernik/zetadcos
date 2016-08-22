@@ -40,8 +40,19 @@ echo ""
 cat /mapr/$CLUSTERNAME/zeta/kstore/zetasync/zetauid.list
 echo ""
 
-read -e -p "Please enter the starting UID for role $ROLE: " -i "1000000" STARTID
-echo "$ROLE:$STARTID" >> /mapr/$CLUSTERNAME/zeta/kstore/zetasync/zetauid.list
+
+SHRD=$(cat /mapr/$CLUSTERNAME/zeta/kstore/zetasync/zetauid.list|grep $ROLE)
+
+if [ "$SHRD" != "" ]; then
+    echo "It looks like the role you are trying to add already has a STARTID specified"
+    echo "We will use this."
+    echo SHRD
+    STARTID=$(echo $SHRD|cut -d":" -f2)
+else
+    read -e -p "Please enter the starting UID for role $ROLE: " -i "1000000" STARTID
+    echo "$ROLE:$STARTID" >> /mapr/$CLUSTERNAME/zeta/kstore/zetasync/zetauid.list
+fi
+
 
 CURUID="$STARTID"
 CURGID=$(($STARTID + 500000))
@@ -54,36 +65,6 @@ CURGID=$(($CURGID + 1))
 ETLGID=$CURGID
 CURGID=$(($CURGID + 1))
 ZETAGID=$CURGID
-
-echo "A data svc account will be crated named zetasvc$ROLE"
-echo "This account will be located in ou=users,ou=zeta$ROLE,dc=marathon,dc=mesos and used as a data service account. More can be created, this is just the first"
-echo "The uid and primary gid for this group will be $SVCUID"
-echo "This user will be a memeber of zeta${ROLE}data, zeta${ROLE}apps, zeta${ROLE}zeta, and zeta${ROLE}etl"
-
-stty -echo
-printf "Please enter new password for zetasvc$ROLE: "
-read PASS1
-echo ""
-printf "Please re-enter password for the zetasvc$ROLE: "
-read PASS2
-echo ""
-stty echo
-
-# If the passwords don't match, keep asking for passwords until they do
-while [ "$PASS1" != "$PASS2" ]
-do
-    echo "Passwords entered for zetasvc$ROLE do not match, please try again"
-    stty -echo
-    printf "Please enter new password for zetasvc$ROLE: "
-    read PASS1
-    echo ""
-    printf "Please re-enter password for the zetasvc$ROLE: "
-    read PASS2
-    echo ""
-    stty echo
-done
-
-
 
 LDAPPASS=$(cat ${LDAP_ROOT}/initconf/default.yaml.startup|grep ADMIN|sed "s/LDAP_ADMIN_PASSWORD: //")
 
@@ -107,27 +88,7 @@ cat $TMPAPASSFILE|tr -d "\n" > $APASSFILE
 rm $TMPAPASSFILE
 chmod 600 $APASSFILE
 
-UPASSFILE="${TMP_LDIF}/u.txt"
-TMPUPASSFILE="${TMP_LDIF}/i.txt"
-mkdir -p $TMP_LDIF
-
-chmod -R 750 $TMP_LDIF
-touch $UPASSFILE
-touch $TMPUPASSFILE
-chmod 600 $UPASSFILE
-chmod 600 $TMPUPASSFILE
-
-cat > $TMPUPASSFILE << PWF
-${PASS1}
-PWF
-cat $TMPUPASSFILE|tr -d "\n" > $UPASSFILE
-rm $TMPUPASSFILE
-chmod 600 $UPASSFILE
-
 DCKR="sudo docker run --rm -v=${TMP_LDIF}:/tmp/ldif:ro ${APP_IMG}"
-
-UHASH=$($DCKR slappasswd -T /tmp/ldif/u.txt)
-echo $UHASH
 
 cat > ${TMP_LDIF}/tmp.ldif << EOL
 dn: ou=zeta$ROLE,dc=marathon,dc=mesos
@@ -151,72 +112,10 @@ objectClass: top
 objectClass: organizationalUnit
 description: Users for use in Zeta Role $ROLE
 
-dn: cn=zeta${ROLE}apps,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
-changetype: add
-objectClass: top
-objectClass: posixGroup
-gidNumber: $APPGID
-description:  Access group for role $ROLE and the apps directory
-
-dn: cn=zeta${ROLE}data,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
-changetype: add
-objectClass: top
-objectClass: posixGroup
-gidNumber: $DATAGID
-description:  Access group for role $ROLE and the data directory
-
-dn: cn=zeta${ROLE}etl,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
-changetype: add
-objectClass: top
-objectClass: posixGroup
-gidNumber: $ETLGID
-description:  Access group for role $ROLE and the etl directory
-
-dn: cn=zeta${ROLE}zeta,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
-changetype: add
-objectClass: top
-objectClass: posixGroup
-gidNumber: $ZETAGID
-description:  Access group for role $ROLE and the zeta directory
-
-dn: cn=zetasvc$ROLE,ou=users,ou=zeta$ROLE,dc=marathon,dc=mesos
-changetype: add
-objectClass: top
-objectClass: posixAccount
-objectClass: inetOrgPerson
-cn: zetasvc$ROLE
-givenName: zeta$ROLE
-sn: service
-uidNumber: $SVCUID
-uid: zetasvc$ROLE
-gidNumber: 2501
-homeDirectory: /home/zetasvc$ROLE
-loginShell: /bin/bash
-userPassword: $UHASH
-
-dn: cn=zeta${ROLE}apps,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
-changetype: modify
-add: memberuid
-memberuid: zetasvc$ROLE
-
-dn: cn=zeta${ROLE}data,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
-changetype: modify
-add: memberuid
-memberuid: zetasvc$ROLE
-
-dn: cn=zeta${ROLE}etl,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
-changetype: modify
-add: memberuid
-memberuid: zetasvc$ROLE
-
-dn: cn=zeta${ROLE}zeta,ou=groups,ou=zeta$ROLE,dc=marathon,dc=mesos
-changetype: modify
-add: memberuid
-memberuid: zetasvc$ROLE
-
 EOL
 
 ADD_CMD="ldapmodify -H ldap://openldap.shared.marathon.mesos -x -y /tmp/ldif/p.txt -D \"cn=admin,dc=marathon,dc=mesos\" -f /tmp/ldif/tmp.ldif"
+
 cat > ${TMP_LDIF}/run.sh << ERUN
 #!/bin/bash
 $ADD_CMD
@@ -226,3 +125,22 @@ chmod +x ${TMP_LDIF}/run.sh
 $DCKR /tmp/ldif/run.sh
 
 rm -rf $TMP_LDIF
+
+echo "A data svc account will be crated named zetasvc$ROLE"
+echo "This account will be located in ou=users,ou=zeta$ROLE,dc=marathon,dc=mesos and used as a data service account. More can be created, this is just the first"
+echo "The uid and primary gid for this group will be $SVCUID"
+echo "This user will be a memeber of zeta${ROLE}data, zeta${ROLE}apps, zeta${ROLE}zeta, and zeta${ROLE}etl"
+
+./add_zeta_user.sh $ROLE zetasvc$ROLE $SVCUID 1
+
+./add_zeta_group.sh $ROLE zeta${ROLE}apps $APPGID "Access group for role $ROLE and the apps directory" 1
+./add_zeta_group.sh $ROLE zeta${ROLE}data $DATAGID "Access group for role $ROLE and the data directory" 1
+./add_zeta_group.sh $ROLE zeta${ROLE}etl $ETLGID "Access group for role $ROLE and the etl directory" 1
+./add_zeta_group.sh $ROLE zeta${ROLE}zeta $ZETAGID "Access group for role $ROLE and the zeta directory" 1
+
+
+./add_zeta_user_to_group.sh $ROLE zetasvc${ROLE} zeta${ROLE}apps 1
+./add_zeta_user_to_group.sh $ROLE zetasvc${ROLE} zeta${ROLE}data 1
+./add_zeta_user_to_group.sh $ROLE zetasvc${ROLE} zeta${ROLE}etl 1
+./add_zeta_user_to_group.sh $ROLE zetasvc${ROLE} zeta${ROLE}zeta 1
+./add_zeta_user_to_group.sh $ROLE zetasvc${ROLE} zetausers 1
