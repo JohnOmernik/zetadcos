@@ -17,11 +17,27 @@ fi
 
 SOURCE_IMG="osixia/openldap:1.1.5"
 
-sudo docker pull $SOURCE_IMG
 APP_IMG="${ZETA_DOCKER_REG_URL}/openldap"
 
-sudo docker tag $SOURCE_IMG $APP_IMG
-sudo docker push $APP_IMG
+
+SOURCE_GIT="https://github.com/osixia/docker-openldap.git"
+
+
+DCK=$(sudo docker images|grep openldap)
+
+if [ "$DCK" == "" ]; then 
+    git clone $SOURCE_GIT
+    cd docker-openldap
+    cd image
+    sed -i "s/RUN groupadd -r openldap/RUN groupadd -g 2500 openldap/" ./Dockerfile
+    sed -i "s/useradd -r -g openldap/useradd -u 2500 -g openldap/" ./Dockerfile
+    sudo docker build -t $APP_IMG .
+    sudo docker push $APP_IMG
+    cd ..
+    cd ..
+    rm -rf docker-openldap
+fi 
+
 
 APP_ROOT="/mapr/$CLUSTERNAME/zeta/shared/openldap"
 
@@ -137,11 +153,14 @@ cat > $MARFILE << EOF
 }
 EOF
 
+#  "args":[
+#  "--loglevel", "debug"
+#  ],
 
 # Add this to Docker file to increase container logginer (remove the bash comments)
-#"args":[
-#   "--loglevel", "debug"
-#  ],
+
+
+sleep 5
 
 echo "Submitting to Marathon"
 curl -X POST $MARATHON_SUBMIT -d @${MARFILE} -H "Content-type: application/json"
