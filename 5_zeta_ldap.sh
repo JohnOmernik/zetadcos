@@ -81,7 +81,7 @@ cat $TMPPASSFILE|tr -d "\n" > $PASSFILE
 rm $TMPPASSFILE
 chmod 600 $PASSFILE
 
-DCKR="sudo docker run --rm -v=${TMP_LDIF}:/tmp/ldif:ro ${APP_IMG}" 
+DCKR="sudo docker run --rm -v=${TMP_LDIF}:/tmp/ldif:ro ${APP_IMG}"
 
 cat > ${TMP_LDIF}/zetausers.ldif << EOL
 dn: cn=zetausers,dc=marathon,dc=mesos
@@ -100,3 +100,4 @@ chmod +x ${TMP_LDIF}/run.sh
 $DCKR /tmp/ldif/run.sh
 
 rm -rf $TMP_LDIF
+./add_role_schema.sh shared
