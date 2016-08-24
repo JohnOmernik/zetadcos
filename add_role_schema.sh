@@ -31,8 +31,8 @@ if [ -f "$SCHEMA_INST" ]; then
    exit 1
 fi
 
-#touch $SCHEMA_INST
-echo "Please enter the starting UID number for this role"
+touch $SCHEMA_INST
+echo "Please enter the starting UID number for this role - $ROLE"
 echo "To help, here is a list of the currently defined roles"
 echo "If no roles are established, we recommend starting with 1000000"
 echo "If roles are established take the highest role and add 1000000"

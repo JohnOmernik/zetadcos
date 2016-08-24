@@ -26,9 +26,25 @@ SOURCE_GIT="https://github.com/osixia/docker-openldap.git"
 DCK=$(sudo docker images|grep openldap)
 
 if [ "$DCK" == "" ]; then 
+
     git clone $SOURCE_GIT
     cd docker-openldap
     cd image
+
+    if [ "$DOCKER_PROXY" != "" ]; then
+        DOCKER_LINE1="ENV http_proxy=$DOCKER_PROXY"
+        DOCKER_LINE2="ENV HTTP_PROXY=$DOCKER_PROXY"
+        DOCKER_LINE3="ENV https_proxy=$DOCKER_PROXY"
+        DOCKER_LINE4="ENV HTTPS_PROXY=$DOCKER_PROXY"
+	sed -i "/MAINTAINER /a $DOCKER_LINE4" Dockerfile
+	sed -i "/MAINTAINER /a $DOCKER_LINE3" Dockerfile
+	sed -i "/MAINTAINER /a $DOCKER_LINE2" Dockerfile
+	sed -i "/MAINTAINER /a $DOCKER_LINE1" Dockerfile
+    fi
+
+
+
+
     sed -i "s/RUN groupadd -r openldap/RUN groupadd -g 2500 openldap/" ./Dockerfile
     sed -i "s/useradd -r -g openldap/useradd -u 2500 -g openldap/" ./Dockerfile
     sudo docker build -t $APP_IMG .
@@ -160,7 +176,7 @@ EOF
 # Add this to Docker file to increase container logginer (remove the bash comments)
 
 
-sleep 5
+sleep 1
 
 echo "Submitting to Marathon"
 curl -X POST $MARATHON_SUBMIT -d @${MARFILE} -H "Content-type: application/json"
