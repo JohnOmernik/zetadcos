@@ -196,7 +196,7 @@ export ZETA_MARATHON_HOST="\${ZETA_MARATHON_ENV}.\${ZETA_MESOS_DOMAIN}"
 export ZETA_MARATHON_PORT="8080"
 export ZETA_MARATHON_URL="\$ZETA_MARATHON_HOST:\$ZETA_MARATHON_PORT"
 export ZETA_MARATHON_SUBMIT="http://\$ZETA_MARATHON_URL/v2/apps"
-
+export ZETA_ZKS="$ZKS"
 
 # Source env_prod
 for SRC in /mapr/\$ZETA_CLUSTERNAME/zeta/kstore/env/env_shared/*.sh; do
