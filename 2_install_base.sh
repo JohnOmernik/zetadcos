@@ -199,6 +199,7 @@ export ZETA_MARATHON_SUBMIT="http://\$ZETA_MARATHON_URL/v2/apps"
 export ZETA_CLDBS="$CLDBS"
 export ZETA_IUSER="$IUSER"
 export ZETA_ZKS="$ZKS"
+export ZETA_DOCKER_PROXY="$DOCKER_PROXY"
 
 # Source env_prod
 for SRC in /mapr/\$ZETA_CLUSTERNAME/zeta/kstore/env/env_shared/*.sh; do
