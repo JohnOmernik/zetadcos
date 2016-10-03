@@ -104,7 +104,7 @@ sudo  tee /etc/ldap.conf << EOR
 # The distinguished name of the search base.
 base dc=marathon,dc=mesos
 # Another way to specify your LDAP server is to provide an
-uri ldap://openldap.shared.marathon.mesos
+uri ldap://openldap-shared.marathon.agentip.dcos.thisdcos.directory
 # The LDAP version to use (defaults to 3 if supported by client library)
 ldap_version 3
 pam_password md5

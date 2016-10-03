@@ -59,7 +59,7 @@ echo "What port do you want to run ldap admin on? (Default 6443)"
 read -e -p "LDAP Admin Port: " -i "6443" APP_PORT
 
 cat > /mapr/$CLUSTERNAME/zeta/kstore/env/env_shared/ldapadmin.sh << EOL
-export ZETA_LDAPADMIN_HOST="ldapadmin.shared.marathon.mesos"
+export ZETA_LDAPADMIN_HOST="ldapadmin-shared.marathon.agentip.dcos.thisdcos.directory"
 export ZETA_LDAPADMIN_PORT="$APP_PORT"
 EOL
 
@@ -78,7 +78,7 @@ cat > $MARFILE << EOF
    "CONTAINERIZER":"Docker"
   },
   "env": {
-  "PHPLDAPADMIN_LDAP_HOSTS":"#PYTHON2BASH:[{'openldap.shared.marathon.mesos': [{'server': [{'tls': False}]}, {'login': [{'bind_id': 'cn=admin,dc=marathon,dc=mesos'}]}]}]"
+  "PHPLDAPADMIN_LDAP_HOSTS":"#PYTHON2BASH:[{'openldap-shared.marathon.agentip.dcos.thisdcos.directory': [{'server': [{'tls': False}]}, {'login': [{'bind_id': 'cn=admin,dc=marathon,dc=mesos'}]}]}]"
   },
   "ports": [],
   "container": {

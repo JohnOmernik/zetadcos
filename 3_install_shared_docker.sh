@@ -61,12 +61,12 @@ sudo docker push ${DOCKER_REG_URL}/dockerregv2
 echo "What Service port should this new shared Docker Registry use? The MapR Docker Container is using port 5000, we recommend something different: How about 5005?"
 read -e -p "What service port should we used for the shared docker registry instance? " -i "5005" NEW_DOCKER_REG_PORT
 
-NEW_DOCKER_REG_HOST="dockerregv2.shared.marathon.mesos"
+NEW_DOCKER_REG_HOST="dockerregv2-shared.marathon.agentip.dcos.thisdcos.directory"
 ZETA_DOCKER_REG_URL="${NEW_DOCKER_REG_HOST}:${NEW_DOCKER_REG_PORT}"
 
 cat > /mapr/$CLUSTERNAME/zeta/kstore/env/env_shared/dockerregv2.sh << EOL
 
-export ZETA_DOCKER_REG_HOST="dockerregv2.shared.marathon.mesos"
+export ZETA_DOCKER_REG_HOST="$NEW_DOCKER_REG_HOST"
 export ZETA_DOCKER_REG_PORT="$NEW_DOCKER_REG_PORT"
 export ZETA_DOCKER_REG_URL="\${ZETA_DOCKER_REG_HOST}:\${ZETA_DOCKER_REG_PORT}"
 
