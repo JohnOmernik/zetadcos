@@ -129,9 +129,9 @@ When a role is installed, certain things need to happen, here are some lists of 
 The shared role, as stated above, is designed to provide cluster wide services.  Each service here will be vetted and designed to run in the shared role, (althought another "version" to duplicate service maybe available for other roles)
 
 #### Current Services
-* Docker Registry - A docker registry for cluster wide images to be stored in. This runs on port 5005 and can be found via dockerregv2.shared.marathon.mesos
-* Open LDAP server as a shared directory for the cluster. This runs in host mode on ports 389/636 (standard LDAP ports) and can be found via openldap.shared.marathon.mesos
-* Ldap Administration application for administrating the cluster directory. This runs (if defaults are used) at ldapadmin.shared.marathon.mesos:6443
+* Docker Registry - A docker registry for cluster wide images to be stored in. This runs on port 5005 and can be found via dockerregv2-shared.marathon.agentip.dcos.thisdcos.directory
+* Open LDAP server as a shared directory for the cluster. This runs in host mode on ports 389/636 (standard LDAP ports) and can be found via openldap-shared.marathon.agentip.dcos.thisdcos.directory
+* Ldap Administration application for administrating the cluster directory. This runs (if defaults are used) at ldapadmin-shared.marathon.agentip.dcos.thisdcos.directory:6443
 
 #### Desired Services
 

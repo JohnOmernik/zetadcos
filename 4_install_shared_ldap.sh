@@ -99,7 +99,7 @@ sudo chmod -R 750 ${APP_ROOT}
 
 
 cat > /mapr/$CLUSTERNAME/zeta/kstore/env/env_shared/openldap.sh << EOL
-export ZETA_OPENLDAP_HOST="openldap.shared.marathon.mesos"
+export ZETA_OPENLDAP_HOST="openldap-shared.marathon.agentip.dcos.thisdcos.directory"
 export ZETA_OPENLDAP_PORT="389"
 export ZETA_OPENLDAP_SECURE_PORT="636"
 EOL
