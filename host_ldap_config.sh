@@ -88,7 +88,7 @@ fi
 echo "\$INST_TYPE"
 
 if [ "\$INST_TYPE" == "ubuntu" ]; then
-   sudo DEBIAN_FRONTEND=noninteractive apt-get install -qq -y libpam-ldap nscd
+   sudo DEBIAN_FRONTEND=noninteractive apt-get install -qq -y libpam-ldapd libnss-ldapd nscd
 
    sudo tee /usr/share/pam-configs/my_mkhomedir << EOL
 Name: activate mkhomedir
