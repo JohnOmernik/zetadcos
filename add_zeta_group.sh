@@ -112,7 +112,7 @@ gidNumber: $GID
 description: $GDESC
 EOL
 
-ADD_CMD="ldapmodify -H ldap://openldap-shared.marathon.agentip.dcos.thisdcos.directory -x -y /tmp/ldif/p.txt -D \"cn=admin,dc=marathon,dc=mesos\" -f /tmp/ldif/tmp.ldif"
+ADD_CMD="ldapmodify -H ldap://openldap-shared.marathon.slave.mesos -x -y /tmp/ldif/p.txt -D \"cn=admin,dc=marathon,dc=mesos\" -f /tmp/ldif/tmp.ldif"
 cat > ${TMP_LDIF}/run.sh << ERUN
 #!/bin/bash
 $ADD_CMD
