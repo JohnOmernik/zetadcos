@@ -113,12 +113,49 @@ binddn cn=readonly,dc=marathon,dc=mesos
 bindpw readonly
 EOR
 
+
+
+sudo tee /etc/nslcd.conf << EON
+# /etc/nslcd.conf
+# nslcd configuration file. See nslcd.conf(5)
+# for details.
+
+# The user and group nslcd should run as.
+uid nslcd
+gid nslcd
+
+# The location at which the LDAP server(s) should be reachable.
+uri ldap://openldap-shared.marathon.slave.mesos
+
+# The search base that will be used for all queries.
+base dc=marathon,dc=mesos
+
+# The LDAP protocol version to use.
+ldap_version 3
+
+# The DN to bind with for normal lookups.
+binddn cn=readonly,dc=marathon,dc=mesos
+bindpw readonly
+
+# The DN used for password modifications by root.
+#rootpwmoddn cn=admin,dc=example,dc=com
+
+# SSL options
+#ssl off
+#tls_reqcert never
+tls_cacertfile /etc/ssl/certs/ca-certificates.crt
+
+# The search scope.
+#scope sub
+
+EON
+
 sudo DEBIAN_FRONTEND=noninteractive pam-auth-update
 
 sudo sed -i "s/compat/compat ldap/g" /etc/nsswitch.conf
 
 sudo /etc/init.d/nscd restart
-
+sudo service nslcd restart
 
 elif [ "\$INST_TYPE" == "rh_centos" ]; then
    echo "Needs work"
