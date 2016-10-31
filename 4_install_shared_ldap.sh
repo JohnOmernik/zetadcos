@@ -13,10 +13,6 @@ if [ "$CURUSER" != "$IUSER" ]; then
     echo "Must use $IUSER: User: $CURUSER"
 fi
 
-
-
-SOURCE_IMG="osixia/openldap:1.1.5"
-
 APP_IMG="${ZETA_DOCKER_REG_URL}/openldap"
 
 
@@ -25,7 +21,7 @@ SOURCE_GIT="https://github.com/osixia/docker-openldap.git"
 
 DCK=$(sudo docker images|grep openldap)
 
-if [ "$DCK" == "" ]; then 
+if [ "$DCK" == "" ]; then
 
     git clone $SOURCE_GIT
     cd docker-openldap
@@ -36,6 +32,11 @@ if [ "$DCK" == "" ]; then
         DOCKER_LINE2="ENV HTTP_PROXY=$DOCKER_PROXY"
         DOCKER_LINE3="ENV https_proxy=$DOCKER_PROXY"
         DOCKER_LINE4="ENV HTTPS_PROXY=$DOCKER_PROXY"
+        DOCKER_LINE5="ENV NO_PROXY=$DOCKER_NOPROXY"
+        DOCKER_LINE6="ENV no_proxy=$DOCKER_NOPROXY"
+
+	sed -i "/MAINTAINER /a $DOCKER_LINE6" Dockerfile
+	sed -i "/MAINTAINER /a $DOCKER_LINE5" Dockerfile
 	sed -i "/MAINTAINER /a $DOCKER_LINE4" Dockerfile
 	sed -i "/MAINTAINER /a $DOCKER_LINE3" Dockerfile
 	sed -i "/MAINTAINER /a $DOCKER_LINE2" Dockerfile
@@ -93,13 +94,14 @@ mkdir -p ${APP_ROOT}/ldap
 mkdir -p ${APP_ROOT}/slapd.d
 mkdir -p ${APP_ROOT}/ldapmod
 mkdir -p ${APP_ROOT}/initconf
+mkdir -p ${APP_ROOT}/certs
 
 sudo chown -R zetaadm:zetaadm ${APP_ROOT}
 sudo chmod -R 750 ${APP_ROOT}
 
 
 cat > /mapr/$CLUSTERNAME/zeta/kstore/env/env_shared/openldap.sh << EOL
-export ZETA_OPENLDAP_HOST="openldap-shared.marathon.agentip.dcos.thisdcos.directory"
+export ZETA_OPENLDAP_HOST="openldap-shared.marathon.slave.mesos"
 export ZETA_OPENLDAP_PORT="389"
 export ZETA_OPENLDAP_SECURE_PORT="636"
 EOL
@@ -117,6 +119,13 @@ cat > ${APP_ROOT}/initconf/default.yaml << EOL1
 # see table 5.1 in http://www.openldap.org/doc/admin24/slapdconf2.html for the available log levels.
 LDAP_LOG_LEVEL: 256
 
+LDAP_ORGANISATION: $CLUSTERNAME
+LDAP_DOMAIN: marathon.mesos
+LDAP_BASE_DN: dc=marathon,dc=mesos
+LDAP_ADMIN_PASSWORD: $LDAP_PASS1
+LDAP_READONLY_USER: true
+LDAP_READONLY_USER_USERNAME: readonly
+LDAP_READONLY_USER_PASSWORD: readonly
 
 EOL1
 
@@ -148,6 +157,7 @@ cat > $MARFILE << EOF
   "id": "shared/openldap",
   "cpus": 1,
   "mem": 1024,
+  "env": {"HOSTNAME":"openldap-shared.marathon.mesos"},
   "instances": 1,
   "labels": {
    "CONTAINERIZER":"Docker"
@@ -161,6 +171,7 @@ cat > $MARFILE << EOF
     },
     "volumes": [
       { "containerPath": "/var/lib/ldap", "hostPath": "${APP_ROOT}/ldap", "mode": "RW" },
+      { "containerPath": "/container/service/slapd/assets/certs", "hostPath": "${APP_ROOT}/certs", "mode": "RW" },
       { "containerPath": "/tmp/ldapmod", "hostPath": "${APP_ROOT}/ldapmod", "mode": "RW" },
       { "containerPath": "/etc/ldap/slapd.d", "hostPath": "${APP_ROOT}/slapd.d", "mode": "RW" },
       { "containerPath": "/container/environment/02-custom", "hostPath": "${APP_ROOT}/initconf", "mode": "RO" }

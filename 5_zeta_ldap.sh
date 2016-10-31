@@ -90,7 +90,7 @@ objectClass: posixGroup
 gidNumber: 2501
 EOL
 
-ADD_CMD="ldapadd -H ldap://openldap-shared.marathon.agentip.dcos.thisdcos.directory -x -y /tmp/ldif/p.txt -D \"cn=admin,dc=marathon,dc=mesos\" -f /tmp/ldif/zetausers.ldif"
+ADD_CMD="ldapadd -H ldap://openldap-shared.marathon.slave.mesos -x -y /tmp/ldif/p.txt -D \"cn=admin,dc=marathon,dc=mesos\" -f /tmp/ldif/zetausers.ldif"
 cat > ${TMP_LDIF}/run.sh << ERUN
 #!/bin/bash
 $ADD_CMD
