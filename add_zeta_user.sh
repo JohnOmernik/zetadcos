@@ -199,7 +199,8 @@ if [ ! -d "/mapr/$CLUSTERNAME/user/$UNAME" ]; then
         sleep 1
         T=$(ls -1 /mapr/$CLUSTERNAME/user|grep $UNAME)
     done
-    sudo chown $UNAME:$UNAME /mapr/$CLUSTERNAME/user/$UNAME
+    sudo chown $UNAME:zetaadm /mapr/$CLUSTERNAME/user/$UNAME
+    sudo chmod 750 /mapr/$CLUSTERNAME/user/$UNAME
 fi
 
 
