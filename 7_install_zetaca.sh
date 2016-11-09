@@ -124,6 +124,37 @@ echo ""
 
 read -e -p "Please enter the port for the Zeta CA Rest service to run on: " -i "10443" APP_PORT
 
+echo ""
+echo "When certificates are created using this CA, we can provide reasonable defaults to make the process easy, let's store those here:"
+echo ""
+read -e -p "Default Certificate Country (C): " -i "US" CERT_C
+echo ""
+read -e -p "Default Certificate State (ST): " -i "WI" CERT_ST
+echo ""
+read -e -p "Default Certificate Location (L): " -i "Wittenberg" CERT_L
+echo ""
+read -e -p "Default Certificate Organization (O): " -i "OIT" CERT_O
+echo ""
+read -e -p "Default Certificate Organizational Unit (OU): " -i "Zeta" CERT_OU
+echo ""
+read -e -p "Default Certificate Common Name (CN): " -i "id.marathon.slave.mesos" CERT_CN
+echo ""
+echo "This information will be offered as the defaults for new certs, however, can be changed"
+echo ""
+
+cat > /mapr/giszeta/zeta/kstore/env/env_shared/zetaca.sh << EOA
+#!/bin/bash
+export ZETA_CERT_C="$CERT_C"
+export ZETA_CERT_ST="$CERT_ST"
+export ZETA_CERT_L="$CERT_L"
+export ZETA_CERT_O="$CERT_O"
+export ZETA_CERT_OU="$CERT_OU"
+export ZETA_CERT_CN="$CERT_CN"
+
+EOA
+
+
+
 cat > ${APP_HOME}/marathon.json << EOL4
 {
   "id": "shared/zetaca",
