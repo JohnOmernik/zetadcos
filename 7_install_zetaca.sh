@@ -27,7 +27,7 @@ fi
 
 BUILD_TMP="./tmp_build"
 
-SOURCE_GIT="https://git.organizedvillainy.com/ryan/ca_rest"
+SOURCE_GIT="https://github.com/JohnOmernik/ca_rest"
 DCK=$(sudo docker images|grep zetaca)
 
 if [ "$DCK" == "" ]; then
