@@ -150,7 +150,9 @@ export ZETA_CERT_L="$CERT_L"
 export ZETA_CERT_O="$CERT_O"
 export ZETA_CERT_OU="$CERT_OU"
 export ZETA_CERT_CN="$CERT_CN"
-
+export ZETA_CA="http://zetaca-shared.marathon.slave.mesos:$APP_PORT"
+export ZETA_CA_CERT="\${ZETA_CA}/cacert"
+export ZETA_CA_CSR="\${ZETA_CA}/csr"
 EOA
 
 
