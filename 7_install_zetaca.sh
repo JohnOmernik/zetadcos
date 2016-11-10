@@ -68,7 +68,7 @@ $DOCKER_LINE5
 $DOCKER_LINE6
 
 RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
-RUN apt-get update && apt-get install -y curl openssl libreadline6 libreadline6-dev zlib1g-dev openjdk-8-jre-headless libssl-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison subversion pkg-config git && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl openssl libreadline6 libreadline6-dev zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev automake libtool bison subversion pkg-config git && rm -rf /var/lib/apt/lists/*
 RUN \curl -sSL https://get.rvm.io | bash -s stable --ruby
 RUN git clone $SOURCE_GIT /root/ca_rest
 WORKDIR /root/ca_rest
