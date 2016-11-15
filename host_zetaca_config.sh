@@ -63,7 +63,7 @@ fi
 
 for HOST in $CHOSTS; do
     echo "Updating and adding cert to $HOST"
-    ssh $HOST "sudo curl -o /etc/ssl/certs/zetaca.pem http://zetaca-shared.marathon.slave.mesos:10443/cacert && sudo update-ca-certificates"
+    ssh $HOST "sudo curl -o /usr/local/share/ca-certificates/zetarootca.crt http://zetaca-shared.marathon.slave.mesos:10443/cacert && sudo update-ca-certificates"
     echo ""
 done
 
