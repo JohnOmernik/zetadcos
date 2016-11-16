@@ -106,6 +106,44 @@ sudo chmod 700 $APP_HOME/CA
 # Note: Both this script and the git repo script should be changed so we can write the password to a secure file in $APP_HOME/certs/ca_key.txt 
 # And the script that instantiates the CA reads the value from the file rather than passing it as an argument that will appear in process listing 
 
+echo ""
+read -e -p "Please enter the port for the Zeta CA Rest service to run on: " -i "10443" APP_PORT
+echo ""
+echo "We need some information for the CA Certificate - You can accept defaults, or choose your own for your setup"
+echo "In addition, we may ask if you want to use the CA Certificate value for defaults for other certificates generated, you can always override values on the server certs, but defaults help make things go faster"
+echo ""
+echo "Remember: "
+echo "CA Certificate = The Information on the Certificate for the Certificate Authority"
+echo "Default Certificate = A recommened (and overridable) value for use in creating server certificates later"
+echo ""
+read -e -p "CA Certificate Country (C): " -i "US" CACERT_C
+echo ""
+read -e -p "Default Certificate Country (C) for generated certificates: " -i $CACERT_C CERT_C
+echo ""
+read -e -p "CA Certificate State (ST): " -i "WI" CACERT_ST
+echo ""
+read -e -p "Default Certificate State (ST) for generated certificates: " -i $CACERT_ST CERT_ST
+echo ""
+read -e -p "CA Certificate Location (L): " -i "Wittenberg" CACERT_L
+echo ""
+read -e -p "Default Certificate Location (L) for generated certificates: " -i $CACERT_L CERT_L
+echo ""
+read -e -p "CA Certificate Organization (O): " -i "OIT" CACERT_O
+echo ""
+read -e -p "Default Certificate Organization (O) for generated certificates: " -i $CACERT_O CERT_O
+echo ""
+read -e -p "CA Certificate Organizational Unit (OU): " -i "Zeta" CACERT_OU
+echo ""
+read -e -p "Default Certificate Organizational Unit (OU) for generated certificates: " -i $CACERT_OU CERT_OU
+echo ""
+read -e -p "CA Certificate Common Name (CN): " -i "marathon.mesos" CERTCA_CN
+echo ""
+echo "The Common Name for Certificates will be determined at certificate generation"
+echo ""
+CERT_CN="marathon.mesos"
+
+
+
 cat > $APP_HOME/CA/init_ca.sh << EOL1
 #!/bin/bash
 /root/ca_rest/01_create_ca_files_and_databases.sh /root/ca_rest/CA
@@ -119,33 +157,12 @@ su zetaadm -c /root/ca_rest/CA/init_ca.sh
 EOL2
 chmod +x $APP_HOME/CA/init_all.sh
 
-sudo docker run -it -v=/${APP_HOME}/CA:/root/ca_rest/CA:rw $APP_IMG /root/ca_rest/CA/init_all.sh
+sudo docker run -it -e CACERT_C="$CACERT_C" -e CACERT_ST="$CACERT_ST" -e CACERT_L="$CACERT_L" -e CACERT_O="$CACERT_O" -e CACERT_OU="$CACERT_OU" -e CACERT_CN="$CACERT_CN" -v=/${APP_HOME}/CA:/root/ca_rest/CA:rw $APP_IMG /root/ca_rest/CA/init_all.sh
 
 echo "Certs created:"
 echo ""
 ls -ls $APP_HOME/CA
 echo ""
-
-read -e -p "Please enter the port for the Zeta CA Rest service to run on: " -i "10443" APP_PORT
-
-echo ""
-echo "When certificates are created using this CA, we can provide reasonable defaults to make the process easy, let's store those here:"
-echo ""
-read -e -p "Default Certificate Country (C): " -i "US" CERT_C
-echo ""
-read -e -p "Default Certificate State (ST): " -i "WI" CERT_ST
-echo ""
-read -e -p "Default Certificate Location (L): " -i "Wittenberg" CERT_L
-echo ""
-read -e -p "Default Certificate Organization (O): " -i "OIT" CERT_O
-echo ""
-read -e -p "Default Certificate Organizational Unit (OU): " -i "Zeta" CERT_OU
-echo ""
-read -e -p "Default Certificate Common Name (CN): " -i "id.marathon.slave.mesos" CERT_CN
-echo ""
-echo "This information will be offered as the defaults for new certs, however, can be changed"
-echo ""
-
 cat > /mapr/giszeta/zeta/kstore/env/env_shared/zetaca.sh << EOA
 #!/bin/bash
 export ZETA_CERT_C="$CERT_C"
@@ -159,6 +176,145 @@ export ZETA_CA_CERT="\${ZETA_CA}/cacert"
 export ZETA_CA_CSR="\${ZETA_CA}/csr"
 EOA
 
+
+
+cat > $APP_HOME/gen_server_cert.sh << EOSCA
+#!/bin/bash
+CLUSTERNAME=\$(ls /mapr)
+if [ -f "/mapr/$CLUSTERNAME/zeta/kstore/env/zeta_shared.sh" ]; then
+    . /mapr/$CLUSTERNAME/zeta/kstore/env/zeta_shared.sh
+else
+    echo "No Shared Location"
+fi
+
+if [ -z "\$APP_NAME" ]; then
+    echo "APP_NAME is Not Set using default of Custom"
+    APP_NAME="Custom"
+fi
+if [ -z "\$APP_CERT_LOC" ]; then
+    echo "The location to generate the certificates is not set please provide:"
+    read -e -p "Path to deposit Certificates: " APP_CERT_LOC
+    if [ ! -d "\${APP_CERT_LOC}" ]; then
+        echo "The location: \$APP_CERT_LOC doesn't exist, should we create?"
+        read -e -p "Create \${APP_CERT_LOC}? " -i "N" CREATE_LOC
+        if [ "\$CREATE_LOC" == "Y" ]; then
+            mkdir -p \$APP_CERT_LOC
+        else
+            echo "Exiting"
+            exit 1
+        fi
+    fi
+    if [ -f "\${APP_CERT_LOC}/request.csr" ]; then
+        echo "A Certificate request already exists there, will not proceed"
+        exit 1
+    fi
+fi
+if [ -z "\$CN_GUESS" ]; then
+    if [ -z "\${APP_ID}" ] || [ -z "\${APP_ROLE}" ] || [ -z "\${APP_DOMAIN_ROOT}" ]; then
+        CN_GUESS="Enter CN for App"
+    else
+        CN_GUESS="\${APP_ID}-\${APP_ROLE}.\${APP_DOMAIN_ROOT}"
+    fi
+fi
+
+
+echo ""
+echo "We will now generate a SSL Certificate using ZetaCA"
+echo ""
+echo ""
+read -e -p "\$APP_NAME Certificate Country (C): " -i "\$ZETA_CERT_C" CERT_C
+echo ""
+read -e -p "\$APP_NAME Certificate State (ST): " -i "\$ZETA_CERT_ST" CERT_ST
+echo ""
+read -e -p "\$APP_NAME Certificate Location (L): " -i "\$ZETA_CERT_L" CERT_L
+echo ""
+read -e -p "\$APP_NAME Certificate Organization (O): " -i "\$ZETA_CERT_O" CERT_O
+echo ""
+read -e -p "\$APP_NAME Certificate Organizational Unit (OU): " -i "\$ZETA_CERT_OU" CERT_OU
+echo ""
+echo "The suggested CN here is based off the specifics for this app, and it's recommended you use this default or change if you know what you are doing!"
+echo ""
+read -e -p "\$APP_NAME Certificate Common Name (CN): " -i "\$CN_GUESS" CERT_CN 
+echo ""
+echo "Generating CA Request"
+APP_CERT_REQ="\${APP_CERT_LOC}/request.csr"
+APP_CERT_KEY="\${APP_CERT_LOC}/key-no-password.pem"
+APP_CERT_SRV="\${APP_CERT_LOC}/srv_cert.pem"
+APP_CERT="\${APP_CERT_LOC}/cert.pem"
+APP_CERT_SUB="/C=\${CERT_C}/ST=\${CERT_ST}/L=\${CERT_L}/O=\${CERT_O}/OU=\${CERT_OU}/CN=\${CERT_CN}"
+APP_CERT_CA="\${APP_CERT_LOC}/cacert.pem"
+
+openssl req -nodes -newkey rsa:2048 -keyout \${APP_CERT_KEY} -out \${APP_CERT_REQ} -subj "\$APP_CERT_SUB"
+
+echo ""
+echo "Generating Cert"
+curl -o \${APP_CERT_SRV} -F "file=@\${APP_CERT_REQ}" \${ZETA_CA_CSR}
+curl -o \${APP_CERT_CA} \${ZETA_CA_CERT}
+cat \${APP_CERT_SRV} \${APP_CERT_CA} > \${APP_CERT}
+
+EOSCA
+chmod +x ${APP_HOME}/gen_server_cert.sh
+
+
+cat > ${APP_HOME}/gen_java_keystore.sh << EOJKS
+#!/bin/bash
+# Now convert to JKS for Drill
+CLUSTERNAME=\$(ls /mapr)
+. /mapr/$CLUSTERNAME/zeta/shared/zetaca/gen_server_cert.sh
+
+# Create a single file with both key and cert in pem
+
+APP_KEYCERT_PEM="\${APP_CERT_LOC}/keycert.pem"
+APP_CERT_PKCS12="\${APP_CERT_LOC}/keycert.pkcs12"
+APP_CERT_CA_DER="\${APP_CERT_LOC}/cacert.crt"
+
+APP_KEYSTORE="\${APP_CERT_LOC}/myKeyStore.jks"
+APP_TRUSTSTORE="\${APP_CERT_LOC}/myTrustStore.jts"
+
+APP_KEY_PASS="\${APP_CERT_LOC}/keypass"
+APP_TRUST_PASS="\${APP_CERT_LOC}/trustpass"
+
+echo "We need a password for the trust store"
+echo ""
+echo "***** Note: This password will be echoed on the screen *****"
+echo ""
+read -e -p "Truststore Password: " TRUSTSTOREPASS
+echo ""
+echo "We need a password for the key store"
+echo ""
+echo "***** Note: This password will be echoed on the screen *****"
+echo ""
+read -e -p "Keystore Password: " KEYSTOREPASS
+echo ""
+echo -n "\$TRUSTSTOREPASS" > \${APP_TRUST_PASS}
+echo -n "\$KEYSTOREPASS" > \${APP_KEY_PASS}
+
+
+# Cat the Cert and Key together
+cat \${APP_CERT_KEY} \${APP_CERT_SRV} \${APP_CERT_CA} > \${APP_KEYCERT_PEM}
+# Convert the cacert.pem into der format.
+openssl x509 -in \${APP_CERT_CA} -inform pem -out \${APP_CERT_CA_DER} -outform der
+# Create the new Trust Store
+keytool -import -file \${APP_CERT_CA_DER} -alias mainca -keystore \${APP_TRUSTSTORE} -storepass:file \${APP_TRUST_PASS} -noprompt
+# Convert the cert to pkcs12 file
+openssl pkcs12 -export -in \${APP_KEYCERT_PEM} -out \${APP_CERT_PKCS12} -name mycert -noiter -nomaciter -passout file:\${APP_KEY_PASS}
+# Add Drill Cert to the keystore
+keytool -importkeystore -destkeystore \${APP_KEYSTORE} -deststorepass:file \${APP_KEY_PASS} -srckeystore \${APP_CERT_PKCS12} -srcstoretype pkcs12 -srcstorepass:file \${APP_KEY_PASS} -alias mycert
+# Add CA Cert to the trust store...
+keytool -import -trustcacerts -file \${APP_CERT_CA_DER} -alias mainca -keystore \${APP_KEYSTORE} -storepass:file \${APP_KEY_PASS} -noprompt
+rm \${APP_KEY_PASS}
+rm \${APP_TRUST_PASS}
+
+cat > \${APP_CERT_LOC}/capass << EOF
+#!/bin/bash
+export TRUSTSTOREPASS="\$TRUSTSTOREPASS"
+export KEYSTOREPASS="\$KEYSTOREPASS"
+
+EOF
+
+
+EOJKS
+chmod +x ${APP_HOME}/gen_java_keystore.sh
 
 
 cat > ${APP_HOME}/marathon.json << EOL4
