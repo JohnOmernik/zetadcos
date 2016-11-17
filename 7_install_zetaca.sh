@@ -163,7 +163,7 @@ echo "Certs created:"
 echo ""
 ls -ls $APP_HOME/CA
 echo ""
-cat > /mapr/giszeta/zeta/kstore/env/env_shared/zetaca.sh << EOA
+cat > /mapr/$CLUSTERNAME/zeta/kstore/env/env_shared/zetaca.sh << EOA
 #!/bin/bash
 export ZETA_CERT_C="$CERT_C"
 export ZETA_CERT_ST="$CERT_ST"
