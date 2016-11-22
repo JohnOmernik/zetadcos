@@ -18,9 +18,6 @@ APP_ROOT="/mapr/$CLUSTERNAME/zeta/shared/zetaca"
 APP_HOME="/mapr/$CLUSTERNAME/zeta/shared/zetaca"
 APP_IMG="${ZETA_DOCKER_REG_URL}/zetaca"
 
-
-
-
 BUILD_TMP="./tmp_build"
 SOURCE_GIT="https://github.com/JohnOmernik/ca_rest"
 DCK=$(sudo docker images|grep zetaca)
@@ -260,7 +257,7 @@ cat > ${APP_HOME}/gen_java_keystore.sh << EOJKS
 #!/bin/bash
 # Now convert to JKS for Drill
 CLUSTERNAME=\$(ls /mapr)
-. /mapr/$CLUSTERNAME/zeta/shared/zetaca/gen_server_cert.sh
+. /mapr/\$CLUSTERNAME/zeta/shared/zetaca/gen_server_cert.sh
 
 # Create a single file with both key and cert in pem
 
