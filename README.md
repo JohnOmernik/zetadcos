@@ -129,15 +129,11 @@ When a role is installed, certain things need to happen, here are some lists of 
 The shared role, as stated above, is designed to provide cluster wide services.  Each service here will be vetted and designed to run in the shared role, (althought another "version" to duplicate service maybe available for other roles)
 
 #### Current Services
+* SSL Certificate authority. (Actually installed in maprdcos, but moved to permanent location in this Repo)
 * Docker Registry - A docker registry for cluster wide images to be stored in. This runs on port 5005 and can be found via dockerregv2-shared.marathon.slave.mesos
 * Open LDAP server as a shared directory for the cluster. This runs in host mode on ports 389/636 (standard LDAP ports) and can be found via openldap-shared.marathon.slave.mesos
 * Ldap Administration application for administrating the cluster directory. This runs (if defaults are used) at ldapadmin-shared.marathon.slave.mesos:6443
 
-#### Desired Services
-
-This list is a list of services what would be very helpful as shared services for the cluster. Obviously there are lots of services, but this list focuses on those shared cluster services. 
-* Shared/trusted SSL Certificate authority. This would be trusted by all agent/master nodes, and the authority certificate could be built into docker containers to allow for trusted ssl communications. 
-* Others?
 
 
 
