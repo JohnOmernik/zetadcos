@@ -100,6 +100,15 @@ sudo chown -R zetaadm:zetaadm ${APP_ROOT}
 sudo chmod -R 750 ${APP_ROOT}
 
 
+
+
+
+APP_CERT_LOC="${APP_ROOT}/certs"
+CN_GUESS="openldap-shared.marathon.slave.mesos"
+
+. /mapr/$CLUSTERNAME/zeta/shared/zetaca/gen_server_cert.sh
+
+
 cat > /mapr/$CLUSTERNAME/zeta/kstore/env/env_shared/openldap.sh << EOL
 export ZETA_OPENLDAP_HOST="openldap-shared.marathon.slave.mesos"
 export ZETA_OPENLDAP_PORT="389"
@@ -157,7 +166,12 @@ cat > $MARFILE << EOF
   "id": "shared/openldap",
   "cpus": 1,
   "mem": 1024,
-  "env": {"HOSTNAME":"openldap-shared.marathon.mesos"},
+  "env": {
+            "HOSTNAME":"openldap-shared.marathon.slave.mesos",
+            "LDAP_TLS_CRT_FILENAME":"cert.pem",
+            "LDAP_TLS_KEY_FILENAME":"key-no-password.pem",
+            "LDAP_TLS_CA_CRT_FILENAME":"cacert.pem"
+         },
   "instances": 1,
   "labels": {
    "CONTAINERIZER":"Docker"
