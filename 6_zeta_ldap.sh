@@ -42,7 +42,7 @@ $DOCKER_LINE2
 $DOCKER_LINE3
 $DOCKER_LINE4
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y ldap-utils slapd
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y ldap-utils slapd ca-certificates && rm -f /usr/local/share/ca-certificates/zetaroot.crt && sudo update-ca-certificates -f && sudo curl -o /usr/local/share/ca-certificates/zetaroot.crt http://zetaca-shared.marathon.slave.mesos:10443/cacert && sudo update-ca-certificates
 CMD ["/bin/bash"]
 EOF
     cd ./tmp
