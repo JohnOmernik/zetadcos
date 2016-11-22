@@ -85,7 +85,7 @@ cat > $MARFILE << EOF
   },
   "env": {
   "PHPLDAPADMIN_LDAP_HOSTS":"#PYTHON2BASH:[{'openldap-shared.marathon.slave.mesos': [{'server': [{'tls': False}]}, {'login': [{'bind_id': 'cn=admin,dc=marathon,dc=mesos'}]}]}]",
-  "PHPLDAPADMIN_HTTPS_CRT_FILENAME":"cert.pem",
+  "PHPLDAPADMIN_HTTPS_CRT_FILENAME":"srv_cert.pem",
   "PHPLDAPADMIN_HTTPS_KEY_FILENAME":"key-no-password.pem",
   "PHPLDAPADMIN_HTTPS_CA_CRT_FILENAME":"cacert.pem"
   },
