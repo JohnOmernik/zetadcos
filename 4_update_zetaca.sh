@@ -14,7 +14,7 @@ if [ "$CURUSER" != "$IUSER" ]; then
     echo "Must use $IUSER: User: $CURUSER"
 fi
 
-NEW_APP_LOC="/home/$CLUSTERNAME/zeta/shared/zetaca"
+NEW_APP_LOC="/mapr/$CLUSTERNAME/zeta/shared/zetaca"
 echo ""
 echo "This script updates and moves the currently running zetaca to be running from the MapR Filesystem"
 echo ""
