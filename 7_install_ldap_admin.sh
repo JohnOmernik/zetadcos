@@ -51,6 +51,7 @@ fi
 
 mkdir -p ${APP_ROOT}
 mkdir -p ${APP_ROOT}/conf
+mkdir -p ${APP_ROOT}/certs
 
 sudo chown -R zetaadm:zetaadm ${APP_ROOT}
 sudo chmod -R 750 ${APP_ROOT}
@@ -67,6 +68,11 @@ sudo chmod +x /mapr/$CLUSTERNAME/zeta/kstore/env/env_shared/ldapadmin.sh
 
 MARFILE="${APP_ROOT}/ldapadmin.shared.marathon"
 
+APP_CERT_LOC="${APP_ROOT}/certs"
+CN_GUESS="ldapadmin.marathon.slave.mesos"
+
+. /mapr/$CLUSTERNAME/zeta/shared/zetaca/gen_server_cert.sh
+
 
 cat > $MARFILE << EOF
 {
@@ -78,7 +84,10 @@ cat > $MARFILE << EOF
    "CONTAINERIZER":"Docker"
   },
   "env": {
-  "PHPLDAPADMIN_LDAP_HOSTS":"#PYTHON2BASH:[{'openldap-shared.marathon.slave.mesos': [{'server': [{'tls': False}]}, {'login': [{'bind_id': 'cn=admin,dc=marathon,dc=mesos'}]}]}]"
+  "PHPLDAPADMIN_LDAP_HOSTS":"#PYTHON2BASH:[{'openldap-shared.marathon.slave.mesos': [{'server': [{'tls': False}]}, {'login': [{'bind_id': 'cn=admin,dc=marathon,dc=mesos'}]}]}]",
+  "PHPLDAPADMIN_HTTPS_CRT_FILENAME":"srv_cert.pem",
+  "PHPLDAPADMIN_HTTPS_KEY_FILENAME":"key-no-password.pem",
+  "PHPLDAPADMIN_HTTPS_CA_CRT_FILENAME":"cacert.pem"
   },
   "ports": [],
   "container": {
@@ -89,7 +98,10 @@ cat > $MARFILE << EOF
       "portMappings": [
         { "containerPort": 443, "hostPort": ${APP_PORT}, "servicePort": 0, "protocol": "tcp"}
       ]
-    }
+    },
+    "volumes": [
+      { "containerPath": "/container/service/phpldapadmin/assets/apache2/certs", "hostPath": "${APP_ROOT}/certs", "mode": "RW" }
+    ]
   }
 }
 
