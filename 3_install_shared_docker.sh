@@ -75,6 +75,17 @@ EOL
 
 sudo chmod +x /mapr/$CLUSTERNAME/zeta/kstore/env/env_shared/dockerregv2.sh
 
+
+APP_NAME="docker"
+APP_CERT_LOC="/mapr/$CLUSTERNAME/zeta/shared/dockerregv2/certs"
+sudo mkdir -p ${APP_CERT_LOC}
+sudo chown zetaadm:root ${APP_CERT_LOC}
+sudo chmod 770 ${APP_CERT_LOC}
+CN_GUESS="dockerregv2-shared.marathon.slave.mesos"
+
+. /home/$IUSER/zetaca/zetaca_env.sh
+. /home/$IUSER/zetaca/gen_server_cert.sh
+
 MARFILE="/mapr/$CLUSTERNAME/zeta/shared/dockerregv2/dockerregv2.shared.marathon"
 
 cat > $MARFILE << EOF
@@ -85,6 +96,10 @@ cat > $MARFILE << EOF
   "instances": 1,
   "labels": {
    "CONTAINERIZER":"Docker"
+  },
+  "env": {
+    "REGISTRY_HTTP_TLS_CERTIFICATE": "/certs/srv_cert.pem",
+    "REGISTRY_HTTP_TLS_KEY": "/certs/key-no-password.pem"
   },
   "ports": [],
   "container": {
@@ -97,7 +112,8 @@ cat > $MARFILE << EOF
       ]
     },
     "volumes": [
-      { "containerPath": "/var/lib/registry", "hostPath": "${DOCKER_IMAGE_LOC}", "mode": "RW" }
+      { "containerPath": "/var/lib/registry", "hostPath": "${DOCKER_IMAGE_LOC}", "mode": "RW" },
+      { "containerPath": "/certs", "hostPath": "${APP_CERT_LOC}", "mode": "RO" }
     ]
   }
 }
