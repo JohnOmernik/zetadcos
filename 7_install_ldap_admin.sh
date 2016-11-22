@@ -100,8 +100,7 @@ cat > $MARFILE << EOF
       ]
     },
     "volumes": [
-      { "containerPath": "/container/service/phpldapadmin/assets/apache2/certs", "hostPath": "${APP_ROOT}/certs", "mode": "RW" },
-      { "containerPath": "/container/service/ldap-client/assets/certs", "hostPath": "${APP_ROOT}/certs", "mode": "RW" }
+      { "containerPath": "/container/service/phpldapadmin/assets/apache2/certs", "hostPath": "${APP_ROOT}/certs", "mode": "RW" }
     ]
   }
 }
