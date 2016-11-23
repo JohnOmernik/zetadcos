@@ -33,3 +33,9 @@ if [ "$IUPDATE" == "Y" ]; then
 
 fi
 
+echo ""
+echo ""
+echo "You should probably update masters too: "
+echo "> ./host_ldap_config.sh IP_OF_MASTER"
+echo ""
+echo ""
