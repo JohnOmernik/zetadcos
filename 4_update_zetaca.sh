@@ -119,7 +119,7 @@ echo ""
 MARID="shared/zetaca"
 curl -X DELETE ${MARATHON_SUBMIT}/${MARID} -H "Content-type: application/json"
 echo "Waiting for the deployment to finish"
-sleep 10
+sleep 20
 echo "Submitting new Zeta CA"
 curl -X POST $MARATHON_SUBMIT -d @${NEW_APP_LOC}/marathon.json -H "Content-type: application/json"
 echo ""
