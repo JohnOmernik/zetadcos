@@ -30,7 +30,7 @@ echo "This attempts to enable caches and indexes to make openldap faster with Ma
 echo ""
 echo "--------> This is experimental use at your own risk <---------"
 echo ""
-read -e -p "Do you wish to proceed here?" -i "N" PROCEED
+read -e -p "Do you wish to proceed here? " -i "N" PROCEED
 
 if [ "$PROCEED" != "Y" ]; then
     echo "Wisely exited"
@@ -140,7 +140,7 @@ echo "Instance Stopped, going to run slapindex"
 
 INDEXES="gidNumber uidNumber cn memberUid member"
 
-VOLS="-v=/mapr/brewpot/zeta/shared/openldap/ldap:/var/lib/ldap:rw -v=/mapr/brewpot/zeta/shared/openldap/ldapmod:/tmp/ldapmod:rw -v=/mapr/brewpot/zeta/shared/openldap/slapd.d:/etc/ldap/slapd.d -v=/mapr/brewpot/zeta/shared/openldap/initconf:/container/environment/02-custom:ro"
+VOLS="-v=/mapr/$CLUSTERNAME/zeta/shared/openldap/ldap:/var/lib/ldap:rw -v=/mapr/$CLUSTERNAME/zeta/shared/openldap/ldapmod:/tmp/ldapmod:rw -v=/mapr/$CLUSTERNAME/zeta/shared/openldap/slapd.d:/etc/ldap/slapd.d -v=/mapr/$CLUSTERNAME/zeta/shared/openldap/initconf:/container/environment/02-custom:ro"
 
 echo "Waiting 5 seconds before reindexing"
 sleep 5
