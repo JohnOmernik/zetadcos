@@ -117,13 +117,6 @@ rm ${TMP_LDIF}/tmp_index.ldif
 
 MARATHON_DEP="http://$MARATHON_HOST/v2/deployments"
 
-OLDAP_IMG="$ZETA_DOCKER_REG_URL/openldap"
-echo ""
-echo "Pulling Open LDAP image to ensure we have it locally"
-echo ""
-sudo docker pull $OLDAP_IMG
-echo ""
-echo "Stopping current instance of OpenLDAP"
 
 OUT=$(curl -s -H "Content-type: application/json" -X PUT ${OLDAP_ID} -d'{"instances":0}')
 
@@ -136,27 +129,36 @@ while [ "$DEPLOY" != "" ]; do
     DEPLOY=$(curl -s -H "Content-type: application/json" -X GET ${MARATHON_DEP}|grep "$DEP_ID")
 done
 echo ""
-echo "Instance Stopped, going to run slapindex"
-
-INDEXES="gidNumber uidNumber cn memberUid member"
-
-VOLS="-v=/mapr/$CLUSTERNAME/zeta/shared/openldap/ldap:/var/lib/ldap:rw -v=/mapr/$CLUSTERNAME/zeta/shared/openldap/ldapmod:/tmp/ldapmod:rw -v=/mapr/$CLUSTERNAME/zeta/shared/openldap/slapd.d:/etc/ldap/slapd.d -v=/mapr/$CLUSTERNAME/zeta/shared/openldap/initconf:/container/environment/02-custom:ro"
-
-echo "Waiting 5 seconds before reindexing"
+echo "Instance Stopped"
 sleep 5
-for IDX in $INDEXES; do
-    echo ""
-    echo "Running Index on $IDX"
-    echo ""
-    sudo docker run --name openldap-reindex-$IDX --net=host -it --rm $VOLS --entrypoint slapindex $OLDAP_IMG -F /etc/ldap/slapd.d/ -b "dc=marathon,dc=mesos" $IDX
+
+# Not sure if the following part is needed 
+
+#OLDAP_IMG="$ZETA_DOCKER_REG_URL/openldap"
+#echo ""
+#echo "Pulling Open LDAP image to ensure we have it locally"
+#echo ""
+#sudo docker pull $OLDAP_IMG
+#echo ""
+#echo "Stopping current instance of OpenLDAP"
+
+#INDEXES="gidNumber uidNumber cn memberUid member"
+#VOLS="-v=/mapr/$CLUSTERNAME/zeta/shared/openldap/ldap:/var/lib/ldap:rw -v=/mapr/$CLUSTERNAME/zeta/shared/openldap/ldapmod:/tmp/ldapmod:rw -v=/mapr/$CLUSTERNAME/zeta/shared/openldap/slapd.d:/etc/ldap/slapd.d -v=/mapr/$CLUSTERNAME/zeta/shared/openldap/initconf:/container/environment/02-custom:ro"
+#echo "Waiting 5 seconds before reindexing"
+#sleep 5
+#for IDX in $INDEXES; do
+#    echo ""
+#    echo "Running Index on $IDX"
+#    echo ""
+#    sudo docker run --name openldap-reindex-$IDX --net=host -it --rm $VOLS --entrypoint slapindex $OLDAP_IMG -F /etc/ldap/slapd.d/ -b "dc=marathon,dc=mesos" $IDX
 #    sudo docker run --name openldap-reindex-$IDX --net=host -it --rm $VOLS --entrypoint run $OLDAP_IMG -s -p -k /bin/bash
 #    exit 1
-    echo "Waiting 10 seconds before next reindex"
-    sleep 10
-done
+#    echo "Waiting 10 seconds before next reindex"
+#    sleep 10
+#done
 
-echo "Reimaging Done - Restarting Open LDAP in Marathon"
-echo ""
+#echo ""
+echo "Restarting Open LDAP"
 NEWOUT=$(curl -s -H "Content-type: application/json" -X PUT ${OLDAP_ID} -d'{"instances":1}')
 echo ""
 echo "Started with the following result $NEWOUT"
