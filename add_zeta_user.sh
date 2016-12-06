@@ -187,7 +187,16 @@ chmod +x ${TMP_LDIF}/run.sh
 $DCKR /tmp/ldif/run.sh
 
 
-echo "User added creating home directory in Shared Filesystem"
+echo "User Added to LDAP - Waiting for ldap sync"
+sleep 1
+TST=$(id $UNAME)
+while [ "$TST" == "" ]; do
+    echo "...waiting for ldap sync"
+    sleep 1
+    TST=$(id $UNAME)
+done
+
+echo "User added - creating home directory in Shared Filesystem"
 
 if [ ! -d "/mapr/$CLUSTERNAME/user/$UNAME" ]; then
     echo "$UNAME Home Directory not found: Creating"
@@ -200,7 +209,7 @@ if [ ! -d "/mapr/$CLUSTERNAME/user/$UNAME" ]; then
         T=$(ls -1 /mapr/$CLUSTERNAME/user|grep $UNAME)
     done
     sudo chown $UNAME:zetaadm /mapr/$CLUSTERNAME/user/$UNAME
-    sudo chmod 750 /mapr/$CLUSTERNAME/user/$UNAME
+    sudo chmod 770 /mapr/$CLUSTERNAME/user/$UNAME
 fi
 
 
