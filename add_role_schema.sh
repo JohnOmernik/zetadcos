@@ -30,6 +30,7 @@ if [ -f "$SCHEMA_INST" ]; then
    echo "It looks like role $ROLE already has a schema file"
    exit 1
 fi
+mkdir -p /mapr/$CLUSTERNAME/zeta/kstore/env/env_$ROLE
 
 touch $SCHEMA_INST
 echo "Please enter the starting UID number for this role - $ROLE"
